@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Ansible for DevOps - Part 1"
-date:   2023-09-13 22:00:00 +1000
+date:   2023-09-11 22:00:00 +1000
 categories: ansible devops
 ---
 ## The Use Case
