@@ -63,4 +63,4 @@ The path to the local zip file used to license AAP should be passed to the playb
 
 
 
-In the [next post]({% link 2023-09-14-ansible-for-devops-part2.markdown &}) we'll actually start installing Ansible Automation Platform using Ansible.
+In the [next post]({% link 2023-09-14-ansible-for-devops-part2.markdown %}) we'll actually start installing Ansible Automation Platform using Ansible.
