@@ -37,6 +37,9 @@ I also wanted to demonstrate “config-as-code” principles so the entire demo 
 
 The deployed architecture should look like this:
 
+![Ansible DevOps Demo Architecture](/img/blog1.png)
+
+
 {% highlight ansible %}
 - name: Log in to the OpenShift API
   redhat.openshift.openshift_auth:
