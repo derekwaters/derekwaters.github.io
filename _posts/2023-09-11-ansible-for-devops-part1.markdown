@@ -39,7 +39,7 @@ The deployed architecture should look like this:
 
 ![Ansible DevOps Demo Architecture](/img/blog1.png)
 
-In the [next post]({% link 2023-09-14-ansible-for-devops-part2.markdown %}) we'll actually start installing Ansible Automation Platform using Ansible.
+In the [next post]({% link _posts/2023-09-14-ansible-for-devops-part2.markdown %}) we'll actually start installing Ansible Automation Platform using Ansible.
 
 {% highlight ansible %}
 - name: Log in to the OpenShift API
