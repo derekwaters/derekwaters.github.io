@@ -6,7 +6,7 @@ categories: ansible devops
 ---
 ## The Use Case
 
-A customer with a well-defined pipeline for delivering Kubernetes applications to the cloud had a need to expand their framework to deliver VM-based applications to a public cloud. Their basic requirements were:
+A potential automation user with a well-defined pipeline for delivering Kubernetes applications to the cloud had a need to expand their framework to deliver VM-based applications to a public cloud. Their basic requirements were:
 
 - Use existing Terraform automation to provision cloud infrastructure
 - Separation of concerns - let the app owners be responsible for pre-rollout checks, application installation and verification testing
@@ -14,7 +14,7 @@ A customer with a well-defined pipeline for delivering Kubernetes applications t
 - Automate as much of the process as possible to speed time-to-market for applications
 - Ability to target multiple environments to support blue/green or canary deployments
 
-The customer was aware of Ansible, and other parts of the business were already strong users of Ansible Automation Platform.
+The customer was aware of Ansible, and other parts of their business were already strong users of Ansible Automation Platform.
 
 ## The Plan
 
@@ -40,14 +40,3 @@ The deployed architecture should look like this:
 ![Ansible DevOps Demo Architecture](/img/blog1.png)
 
 In the [next post]({% link _posts/2023-09-14-ansible-for-devops-part2.markdown %}) we'll actually start installing Ansible Automation Platform using Ansible.
-
-{% highlight ansible %}
-- name: Log in to the OpenShift API
-  redhat.openshift.openshift_auth:
-    host: "{{ ocp_host }}"
-    username: "{{ ocp_username }}"
-    password: "{{ ocp_password }}"
-    validate_certs: false
-    state: present
-  register: openshift_auth_results
-{% endhighlight %}
