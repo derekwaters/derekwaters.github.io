@@ -57,13 +57,13 @@ To enable a webhook on the workflow template, allowing it to be triggered by a G
 However, the returned data from this play doesn’t include the webhook endpoint and the webhook key needed to configure GitHub. It took me a while to find a way to retrieve this. The endpoint can be retrieved by doing a lookup on the ansible.controller.controller_api module for the newly created workflow job template.
 
 The returned data includes the endpoint path in the related.webhook_receiver parameter, so the full URL can be constructed:
-    workflow_template: "\{\{ lookup('ansible.controller.controller_api',
-      query_params = { 'name' : 'rollout-app-impl' },
 
 {% highlight ansible %}
 - name: Load the workflow template settings to get webhook details
   ansible.builtin.set_fact:
+    workflow_template: "\{\{ lookup('ansible.controller.controller_api',
       'workflow_job_templates',
+      query_params = { 'name' : 'rollout-app-impl' },
       host = aap_host,
       username = aap_username,
       password = aap_password,
@@ -79,7 +79,7 @@ However, the webhook key isn’t directly returned. This is referenced in the AP
 {% highlight ansible %}
 - name: Try and get the webhook secret
   ansible.builtin.set_fact:
-    key_deets: "{{ lookup('ansible.controller.controller_api',
+    key_deets: "\{\{ lookup('ansible.controller.controller_api',
       'workflow_job_templates/{{ workflow_template.id }}/webhook_key',
       host = aap_host,
       username = aap_username,
