@@ -3,6 +3,7 @@ layout: post
 title:  "Ansible for DevOps - Part 3"
 date:   2023-09-15 22:00:00 +1000
 categories: ansible devops
+excerpt_separator: ""
 ---
 ## Deploy Automation Resources
 
