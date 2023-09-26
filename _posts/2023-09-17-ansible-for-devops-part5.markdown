@@ -36,9 +36,9 @@ The github repo containing the “app team” job templates can be found [here](
 
 Thanks for reading. All the posts are collected here:
 
-[The Use Case and Plan]({% link _posts/2023-09-11-ansible-for-devops-part1.markdown %})
-[Deploy AAP and EDA and License]({% link _posts/2023-09-14-ansible-for-devops-part2.markdown %})
-[Automation Resources, Git and Webhooks]({% link _posts/2023-09-15-ansible-for-devops-part3.markdown %})
-[RBACs and ServiceNow Integration]({% link _posts/2023-09-16-ansible-for-devops-part4.markdown %})
-[Enhancements and Resources]({% link _posts/2023-09-17-ansible-for-devops-part5.markdown %})
+- [The Use Case and Plan]({% link _posts/2023-09-11-ansible-for-devops-part1.markdown %})
+- [Deploy AAP and EDA and License]({% link _posts/2023-09-14-ansible-for-devops-part2.markdown %})
+- [Automation Resources, Git and Webhooks]({% link _posts/2023-09-15-ansible-for-devops-part3.markdown %})
+- [RBACs and ServiceNow Integration]({% link _posts/2023-09-16-ansible-for-devops-part4.markdown %})
+- [Enhancements and Resources]({% link _posts/2023-09-17-ansible-for-devops-part5.markdown %})
 
