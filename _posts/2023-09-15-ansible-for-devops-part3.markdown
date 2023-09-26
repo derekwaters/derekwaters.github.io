@@ -61,12 +61,12 @@ The returned data includes the endpoint path in the related.webhook_receiver par
 {% highlight ansible %}
 - name: Load the workflow template settings to get webhook details
   ansible.builtin.set_fact:
-    workflow_template: "{{ lookup('ansible.controller.controller_api'\,
-      'workflow_job_templates'\,
-      query_params = { 'name' : 'rollout-app-impl' }\,
-      host = aap_host\,
-      username = aap_username\,
-      password = aap_password\,
+    workflow_template: "{{ lookup('ansible.controller.controller_api' COMMA
+      'workflow_job_templates' COMMA
+      query_params = { 'name' : 'rollout-app-impl' } COMMA
+      host = aap_host COMMA
+      username = aap_username COMMA
+      password = aap_password COMMA
       verify_ssl = False) }}"
 - name: Set the webhook_receiver URL
   ansible.builtin.set_fact:
