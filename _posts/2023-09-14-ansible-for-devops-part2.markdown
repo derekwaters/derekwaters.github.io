@@ -48,6 +48,7 @@ Once that’s done, I can install AAP Controller itself. Before deploying EDA, w
 I also retrieve the generated admin password for AAP. This could have been specified as part of the installation, but it was just as easy to have AAP generate a random one.
 
 {% highlight ansible %}
+{% raw %}
 - name: Get AAP admin password
   kubernetes.core.k8s_info:
     api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"
@@ -58,6 +59,7 @@ I also retrieve the generated admin password for AAP. This could have been speci
     namespace: aap
     name: demo-aap-admin-password
   register: aap_admin_pwd
+{% endraw %}
 {% endhighlight %}
 
 ## Deploy EDA
@@ -65,6 +67,7 @@ I also retrieve the generated admin password for AAP. This could have been speci
 The next step is to use the operator to deploy EDA. To do this, I need the AAP URL obtained from the Route previously. This is provided to the operator to install EDA as a Kubernetes spec parameter.
 
 {% highlight ansible %}
+{% raw %}
 - name: Install EDA Controller
   redhat.openshift.k8s:
     api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"
@@ -80,6 +83,7 @@ The next step is to use the operator to deploy EDA. To do this, I need the AAP U
         replicas: 1
         automation_server_url: "{{ aap_route.resources[0].spec.port.targetPort }}://{{ aap_route.resources[0].spec.host }}"
     state: present
+{% endraw %}
 {% endhighlight %}
 
 As with AAP, I wait for the EDA Route URL and EDA admin password to be available to determine when EDA is installed.
@@ -89,6 +93,7 @@ As with AAP, I wait for the EDA Route URL and EDA admin password to be available
 This is an important step. Without it, the subsequent process of adding Ansible resources works until you get to the point of adding a host to an inventory:
 
 {% highlight ansible %}
+{% raw %}
 - name: Add host to inventory
   ansible.controller.host:
     name: "{{ managed_host }}"
@@ -101,6 +106,7 @@ This is an important step. Without it, the subsequent process of adding Ansible 
     tower_host: "{{ aap_host }}"
     tower_username: "{{ aap_username }}"
     tower_password: "{{ aap_password }}"
+{% endraw %}
 {% endhighlight %}
 
 If you haven’t licensed AAP, you get this pretty obscure error message:
@@ -114,6 +120,7 @@ If you log in to the AAP Console at this point (with the URL and credentials tha
 I didn’t want to have to manually perform this licensing step in the middle of a fully automated process. It turns out you can automate this with the ansible.controller collection. This needs you to provide a manifest archive file to the automation script:
 
 {% highlight ansible %}
+{% raw %}
 - name: License AAP
   ansible.controller.license:
     manifest: "{{ aap_manifest_path }}"
@@ -121,6 +128,7 @@ I didn’t want to have to manually perform this licensing step in the middle of
     tower_host: "{{ aap_host }}"
     tower_username: "{{ aap_username }}"
     tower_password: "{{ aap_password }}"
+{% endraw %}
 {% endhighlight %}
 
 Instructions on how to generate the manifest from the Red Hat Cloud Console can be found [here](https://docs.ansible.com/automation-controller/4.4/html/userguide/import_license.html#obtain-sub-manifest)

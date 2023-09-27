@@ -44,6 +44,7 @@ When a workflow template stage fails, the workflow will generate an Incident in 
 To enable a webhook on the workflow template, allowing it to be triggered by a GitHub push, I set the webhook_service param to “github” when creating the workflow job template:
 
 {% highlight ansible %}
+{% raw %}
 - name: Create a workflow template
   ansible.controller.workflow_job_template:
     name: "rollout-app-impl"
@@ -52,6 +53,7 @@ To enable a webhook on the workflow template, allowing it to be triggered by a G
     inventory: "{{ org_platform.name }}-assets"
     webhook_service: "github"
     ...
+{% endraw %}
 {% endhighlight %}
 
 However, the returned data from this play doesn’t include the webhook endpoint and the webhook key needed to configure GitHub. It took me a while to find a way to retrieve this. The endpoint can be retrieved by doing a lookup on the ansible.controller.controller_api module for the newly created workflow job template.
@@ -59,6 +61,7 @@ However, the returned data from this play doesn’t include the webhook endpoint
 The returned data includes the endpoint path in the related.webhook_receiver parameter, so the full URL can be constructed:
 
 {% highlight ansible %}
+{% raw %}
 - name: Load the workflow template settings to get webhook details
   ansible.builtin.set_fact:
     workflow_template: "\{\{ lookup('ansible.controller.controller_api',
@@ -72,11 +75,13 @@ The returned data includes the endpoint path in the related.webhook_receiver par
 - name: Set the webhook_receiver URL
   ansible.builtin.set_fact:
     webhook_receiver: "https://{{ aap_host }}{{ workflow_template.related.webhook_receiver }}"
+{% endraw %}
 {% endhighlight %}
 
 However, the webhook key isn’t directly returned. This is referenced in the API as a child object of the main workflow_job_template. It turns out you can query this using the ansible.controller.controller_api lookup, even though it looks a little dodgy!
 
 {% highlight ansible %}
+{% raw %}
 - name: Try and get the webhook secret
   ansible.builtin.set_fact:
     key_deets: "\{\{ lookup('ansible.controller.controller_api',
@@ -89,6 +94,7 @@ However, the webhook key isn’t directly returned. This is referenced in the AP
 - name: Set the webkook key
   ansible.builtin.set_fact:
     webhook_key: "{{ key_deets.webhook_key }}"
+{% endraw %}
 {% endhighlight %}
 
 We now have the webhook endpoint and key ready to configure in GitHub. Currently this is done manually, but could also be automated.
