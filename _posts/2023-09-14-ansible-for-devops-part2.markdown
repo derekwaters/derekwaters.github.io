@@ -9,6 +9,7 @@ categories: ansible devops
 To deploy AAP I first needed to log in to OpenShift. This is done with the redhat.openshift collection, and generates a token used for subsequent automation calls. To do this, the playbook needs the OpenShift API server hostname, and the username and password of an account with API access. These are passed into the playbook as extra_vars.
 
 {% highlight ansible %}
+{% raw %}
 - name: Log in to the OpenShift API
   redhat.openshift.openshift_auth:
     host: "{{ ocp_host }}"
@@ -17,6 +18,7 @@ To deploy AAP I first needed to log in to OpenShift. This is done with the redha
     validate_certs: false
     state: present
   register: openshift_auth_results
+{% endraw %}
 {% endhighlight %}
 
 I then install the Operator by creating a namespace, an operator group and then subscribing to the AAP operator itself.
@@ -24,6 +26,7 @@ I then install the Operator by creating a namespace, an operator group and then 
 Before installing AAP, we need to wait until the operator is available. Working out how to test for this took a little while to figure out, but the way I settled on was to make Kubernetes info requests to retrieve the Operator Subscription until the list of available operator resources contains more than one item.
 
 {% highlight ansible %}
+{% raw %}
 - name: Wait for the operator to be available
   kubernetes.core.k8s_info:
     api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"
@@ -37,6 +40,7 @@ Before installing AAP, we need to wait until the operator is available. Working 
   until: "operatordetails.resources | length > 0"
   retries: 10
   delay: 30
+{% endraw %}
 {% endhighlight %}
 
 Once that’s done, I can install AAP Controller itself. Before deploying EDA, we need to wait until AAP is available. To do this, I try to retrieve the specified Route (Ingress) into AAP. When that is available, I proceed with the installation.
