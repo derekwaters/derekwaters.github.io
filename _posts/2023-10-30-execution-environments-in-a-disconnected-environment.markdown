@@ -132,7 +132,7 @@ When our execution-environment.yaml refers to additional binary dependencies, th
 
 As it turns out, the Red Hat base EE images are in turn based on the Red Hat Enterprise Linux Universal Base Image (UBI). The UBI has a single repository config file:
 
-{% highlight %}
+{% highlight bash %}
 /etc/yum.conf/ubi.repo
 {% endhighlight %}
 
@@ -177,7 +177,7 @@ A sample execution-environment.yml can be found in this repo: [disconnected-ee.g
 
 [A guide to automation execution environments](https://www.ansible.com/blog/the-anatomy-of-automation-execution-environments)
 
-[Ansible-builder in an offline environment - needs a Red Hat account](https://access.redhat.com/solutions/6955119)
+[Ansible-builder in an offline environment](https://access.redhat.com/solutions/6955119) - requires a Red Hat account
 
 A blog that covers a lot of this material in the ansible-builder v1 world:
 [ansible-builder in a disconnected environment](https://cloudautomation.pharriso.co.uk/post/ansible-builder-disconnected/)
