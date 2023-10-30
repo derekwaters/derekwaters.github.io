@@ -114,11 +114,11 @@ Then, in our execution-environment.yml, we define the following:
 {% raw %}
 additional_build_files:
   - src: files/pip.conf
-	dest: configs
+    dest: configs
 
 additional_build_steps:
   prepend_base:
-	- COPY _build/configs/pip.conf /etc/pip.conf
+    - COPY _build/configs/pip.conf /etc/pip.conf
 {% endraw %}
 {% endhighlight %}
 
@@ -132,10 +132,8 @@ When our execution-environment.yaml refers to additional binary dependencies, th
 
 As it turns out, the Red Hat base EE images are in turn based on the Red Hat Enterprise Linux Universal Base Image (UBI). The UBI has a single repository config file:
 
-{% highlight ini %}
-{% raw %}
+{% highlight %}
 /etc/yum.conf/ubi.repo
-{% endraw %}
 {% endhighlight %}
 
 ubi.repo refers to an Internet-facing repository that can be accessed without needing the client system to be registered with Red Hat. In a disconnected environment, we may have a separate mirrored rpm repo, but how can we tell ansible-builder to use it instead of ubi.repo? Well, we can use a similar process to configuring a custom Python repo. This time, we create a custom repository definition (or copy one from elsewhere):
@@ -156,12 +154,12 @@ And then we customise our execution-environment.yml accordingly. This time, thou
 {% raw %}
 additional_build_files:
   - src: files/my.repo
-	dest: configs
+    dest: configs
 
 additional_build_steps:
   prepend_base:
-	- RUN rm /etc/yum.repos.d/ubi.repo
-	- COPY _build/configs/my.repo /etc/yum.repos.d/my.repo
+    - RUN rm /etc/yum.repos.d/ubi.repo
+    - COPY _build/configs/my.repo /etc/yum.repos.d/my.repo
 {% endraw %}
 {% endhighlight %}
 
@@ -175,9 +173,7 @@ Execution Environments provide a great way to isolate and include only the speci
 
 ## References
 
-A sample execution-environment.yml can be found in this repo:
-
-[disconnected-ee.git](https://github.com/derekwaters/disconnected-ee)
+A sample execution-environment.yml can be found in this repo: [disconnected-ee.git](https://github.com/derekwaters/disconnected-ee)
 
 [A guide to automation execution environments](https://www.ansible.com/blog/the-anatomy-of-automation-execution-environments)
 
