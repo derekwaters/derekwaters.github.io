@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Execution Environments in Disconnected Environments"
-date:   2023-10-30 22:00:00 +1000
+date:   2023-10-30 20:00:00 +1000
 categories: ansible execution environments podman disconnected
 ---
 # Building Execution Environments in a Disconnected Environment
