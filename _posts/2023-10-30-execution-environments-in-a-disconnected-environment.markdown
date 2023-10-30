@@ -8,11 +8,11 @@ categories: ansible execution environments podman disconnected
 
 Ansible Automation Platform (AAP) introduced the idea of Execution Environments (EE) - customisable container images that contain all of the components needed to execute an Ansible playbook. EEs improve the consistency, security and scalability of automation tasks. AAP ships with default EEs, but often AAP users need to build their own EEs to include custom modules, libraries and binary packages.
 
-For some users, building EEs needs to take place in a disconnected environment, without general access to the Internet. ansible-builder v3, included with AAP 2.4, gives us the flexibility to customise our EE build process to deal with these sorts of environments.
+For some users, building EEs needs to take place in a disconnected environment, without general access to the Internet. [ansible-builder v3](https://www.ansible.com/blog/unlocking-efficiency-harnessing-the-capabilities-of-ansible-builder-3.0), included with AAP 2.4, gives us the flexibility to customise our EE build process to deal with these sorts of environments.
 
 ## Ansible-Builder
 
-The tool used to build execution environments is ansible-builder. You can find the documentation and detailed information about it here. ansible-builder takes a definition file written in YAML (by default, named execution-environment.yml), and uses it to build a container image for your desired execution environment.
+The tool used to build execution environments is ansible-builder. You can find the documentation and detailed information about it [here](https://ansible.readthedocs.io/projects/builder/en/latest/). ansible-builder takes a definition file written in YAML (by default, named execution-environment.yml), and uses it to build a container image for your desired execution environment.
 
 Along the way, ansible-builder creates the new image by building a Dockerfile/Containerfile which docker/podman can then turn into a full container image in a container image registry, along with a build context folder with additional resources. Each EE is built as layers on top of a base image, and Red Hat provides both standard and minimal EE container images through Automation Hub or Red Hat’s public image repositories.
 
