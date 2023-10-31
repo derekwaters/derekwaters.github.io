@@ -35,6 +35,7 @@ plugins:
 
 
 rss: True
+linkedin_username: derek-waters-8065703
 
 # Exclude from processing.
 # The following items will not be processed, by default.
