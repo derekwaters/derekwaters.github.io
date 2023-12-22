@@ -114,6 +114,7 @@ We then set up an IAM role, with a policy allowing the role to be assumed by the
 In AAP, we have a test playbook, which simply tries to use the amazon.aws.s3_bucket_info role to get information about S3 buckets:
 
 {% highlight yaml %}
+{% raw %}
 ---
 - name: Access S3 bucket list in AWS using roles
   hosts: all
@@ -143,6 +144,7 @@ In AAP, we have a test playbook, which simply tries to use the amazon.aws.s3_buc
     - name: Dump bucket info native
       ansible.builtin.debug:
         var: result
+{% endraw %}
 {% endhighlight %}
 
 We create a test Amazon credential with the access key and secret details for the IAM user.
