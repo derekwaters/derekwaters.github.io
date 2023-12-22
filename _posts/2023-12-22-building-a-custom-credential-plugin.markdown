@@ -8,9 +8,9 @@ categories: ansible execution environments credentials aws sts assume role
 
 Sometimes the Credential Types in Ansible Automation Platform (AAP) don't quite do what you need. In some cases, you can define a custom Credential Type in AAP to map some credential inputs and inject them into your playbooks as environment variables or extra vars. But sometimes that's not enough and you need to do something more custom.
 
-One such case came up recently. An AAP user was trying to use the amazon.aws collection to manage some cloud infrastructure. But to improve the security posture of their deployment they wanted to use Amazon Web Services (AWS) Security Token Service (STS) to assume a temporary Identity and Access Management (IAM) role to actually perform the automation. Out of the box, the AWS credential type in AAP doesn't support this. 
+One such case came up recently. An AAP user was trying to use the amazon.aws collection to manage some cloud infrastructure. But to improve the security posture of their deployment they wanted to use Amazon Web Services (AWS) Security Token Service (STS) to assume a temporary Identity and Access Management (IAM) role to actually perform the automation. Out of the box, the AWS credential type in AAP doesn't support this.
 
-Fortunately AAP allows you to build custom credentials lookup plugins to do things like this. 
+Fortunately AAP allows you to build custom credentials lookup plugins to do things like this.
 
 ## Custom Credential Plugins
 
@@ -22,9 +22,7 @@ Now if you do all this in AAP you might get confused as to why you can create an
 
 This whole process is a little confusing, but the diagram below explains what's going on:
 
-![ServiceNow Change Request](/img/blog6.png)
-
-DIAGRAM GOES HERE
+![Custom Credential Control Flow](/img/customcredential/diagram_customcred.png)
 
 When AAP tries to populate the Machine Credential when a job is run, it determines that the username field is a lookup, so it accesses the Custom Credential, passing it the ‘identifier = username’ metadata. This is combined with the inputs on the Custom Credential - in this case, just a token value. The Custom Credential backend function then accesses the external secret store, passing the token (from the inputs). The username and password are returned from the external secret store. The Custom Credential then checks the identifier metadata to see what value is being requested, and hence returns the username value, which is then used by the Machine Credential. A similar process occurs when populating the password, but because the identifier is different, the password returned from the secret store is what is returned from the backend function call.
 
@@ -36,15 +34,15 @@ For the AWS assumed role use case, we configure a standard AWS Credential. But r
 
 The AWS Credential looks like this in the AAP console:
 
-IMAGE HERE
+![Amazon Web Services Credential in AAP Console](/img/customcredential/aapawscred.png)
 
 The custom STS role credential looks like this in the AAP console (the Access Key ID and the Secret Key belong to the user assuming the IAM role, and the ARN is a tag identifying the role the user will assume):
 
-IMAGE HERE
+![Custom Credential in AAP Console](/img/customcredential/aapcustomcred.png)
 
 Templates can then be configured to use the AWS Credential:
 
-SCREENSHOT HERE
+![Job Template with AWS Credential](/img/customcredential/aapjobwithcred.png)
 
 ## Installing A Plugin
 
@@ -90,7 +88,7 @@ If you follow the diagram showing how the credentials fields are retrieved from 
 
 However, for the AWS assume_role API, every call returns a new set of AccessKeyId, SecretKey and SecurityToken. So retrieving the AccessKeyId makes a call to assume_role, then retrieving the SecretKey makes another call, which returns a whole new AccessKeyId alongside the SecretKey and SecurityToken. This means that after the three assume_role calls, when you actually try to access AWS, it fails because you’ve got invalid AccessKeyId and SecretKey values from previous calls to assume_role:
 
-DIAGRAM
+![AWS Assume Role Caching Failure](/img/customcredential/diagram_nocaching.png)
 
 This means that for the AWS role custom credential we need to store a cache of the resultant credentials so subsequent calls to the backend function can use the cached values. The cache is keyed by a combination of the access key id and the arn (so a user accessing multiple roles will have different cached credentials, and multiple users accessing the same role will also use different credentials). The credentials returned from AWS STS also include an Expiration date, which is also checked to invalidate the cache.
 
@@ -106,11 +104,12 @@ if (expiration < datetime.datetime.now(expiration.tzinfo)):
 
 In testing, we set up an AWS IAM user with no permissions:
 
-IMAGE
+![AWS User with no Permissions](/img/customcredential/awsuser.png)
 
 We then set up an IAM role, with a policy allowing the role to be assumed by the IAM user, and with permission to read S3 buckets in the AWS account.
 
-IMAGE
+![AWS IAM Role with Permissions](/img/customcredential/awsrole1.png)
+![AWS IAM Role Policy](/img/customcredential/awsrole2.png)
 
 In AAP, we have a test playbook, which simply tries to use the amazon.aws.s3_bucket_info role to get information about S3 buckets:
 
@@ -120,12 +119,12 @@ In AAP, we have a test playbook, which simply tries to use the amazon.aws.s3_buc
   hosts: all
   collections:
     - amazon.aws
-  
+
   tasks:
     - name: Testing that the playbook starts
       ansible.builtin.debug:
         msg: "Testing AWS STS assume_role credentials"
-        
+
     - name: Get S3 bucket info with env vars
       amazon.aws.s3_bucket_info:
         access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
@@ -148,25 +147,27 @@ In AAP, we have a test playbook, which simply tries to use the amazon.aws.s3_buc
 
 We create a test Amazon credential with the access key and secret details for the IAM user.
 
-IMAGE
+![Amazon Web Services Credential for Test User](/img/customcredential/aapusercred.png)
 
 We then create a job running our test playbook with the test credential.
 
-IMAGE
+![Job Template for Test User Credential](/img/customcredential/aapusercredjob.png)
 
 When this job is run, the output indicates that the s3_bucket_info play fails with an AccessDenied error:
 
-IMAGE
+![Test Job Template with Failure](/img/customcredential/s3accessfailure.png)
 
 Instead, we create a custom AWS Role Credential with our plugin. We use the access key and secret key for our test IAM user, and the ARN for the test IAM role:
 
-IMAGE
+![Custom Credential in AAP Console](/img/customcredential/aapcustomcred.png)
 
 Then we create a builtin AWS credential, with each of the three fields using a lookup via our custom credential, and with metadata identifiers of AccessKeyId, SecretAccessKey and SessionToken:
 
-IMAGE
+![Amazon Web Services Credential in AAP Console](/img/customcredential/aapawscred.png)
 
 When this AWS credential is attached to a job running our test playbook, the playbook run successfully lets our test user assume our test IAM role, and runs the playbook in the scope of the assumed credentials. The output now shows details about our S3 buckets, as expected:
+
+![Test Job Template with Success](/img/customcredential/s3accesssuccess.png)
 
 ## Resources
 
