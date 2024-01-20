@@ -171,6 +171,10 @@ When this AWS credential is attached to a job running our test playbook, the pla
 
 ![Test Job Template with Success](/img/customcredential/s3accesssuccess.png)
 
+## But Wait! There's More!
+
+Check out the [next post]({% link _posts/2024-01-20-building-a-custom-credential-plugin-redux.markdown %}) where we further secure the custom credential used to access AWS role assumption.
+
 ## Resources
 
 All of the code for this plugin (including the EE build definition and the test playbook) is available on [Github](https://github.com/derekwaters/aws_role_credential_plugin)
