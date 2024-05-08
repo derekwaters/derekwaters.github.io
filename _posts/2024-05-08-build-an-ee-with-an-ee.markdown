@@ -62,15 +62,16 @@ Red Hat's automation Community of Practice provide a collection called [ee_utili
 
 So far, so good. Using the collection means that the target inventory for your playbook needs to be a host that has ansible-builder on it. That normally means either:
 
-1) Standing up a standalone 'builder' host with ansible-builder on it, including creating, maintaining, securing it etc.
-2) Dynamically creating a host with ansible-builder installed as part of a playbook, then running the ee_builder role, then tearing down the builder, or
-3) Using a Private Automation Hub host, which typically has ansible-builder installed already.
+1. Standing up a standalone 'builder' host with ansible-builder on it, including creating, maintaining, securing it etc.
+2. Dynamically creating a host with ansible-builder installed as part of a playbook, then running the ee_builder role, then tearing down the builder, or
+3. Using a Private Automation Hub host, which typically has ansible-builder installed already.
 
 But what about using an execution environment... to build another execution environment?
 
 *(cue the Inception horns)*
 
 ![We have to go deeper](/img/ee_in_ee/deeper.png)
+
 
 
 ## Is That Even Possible?
