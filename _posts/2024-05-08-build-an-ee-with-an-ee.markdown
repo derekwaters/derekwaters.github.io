@@ -4,8 +4,6 @@ title:  "Building Execution Environments... inside Execution Environments"
 date:   2024-05-08 14:00:00 +1000
 categories: ansible automation platform execution environment eda_configuration
 ---
-# Building Execution Environments... inside Execution Environments
-
 ## About Execution Environments
 
 Ansible Automation Platform (AAP) introduced the idea of execution environments. These are container images that encapsulate just the libraries, collections and binaries needed to execute Ansible playbooks, and nothing more. This gives advantages in terms of:
