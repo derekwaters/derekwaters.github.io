@@ -27,7 +27,7 @@ Red Hat's automation Community of Practice provide a collection called [ee_utili
   hosts: localhost
   connection: local
   become: false
-  gather_facts: true
+  gather_facts: false
   collections:
     - infra.ee_utilities
   vars:
@@ -68,15 +68,15 @@ So far, so good. Using the collection means that the target inventory for your p
 
 But what about using an execution environment... to build another execution environment?
 
-*(cue the Inception horns)*
-
 ![We have to go deeper](/img/ee_in_ee/deeper.png)
 
+*(cue the Inception horns)*
 
 
-## Is That Even Possible?
 
-What this is trying to do is to run a container (from an execution environment container image) and from inside the container, we're going to build another container. To do that, though, the container runtime needs to *run* another container. This gets referred to as DinD (Docker in Docker) or PinP (Podman in Podman).
+## We Have To Go Deeper
+
+What this means is running a container (from an execution environment container image) and then, from inside the container, we're going to build another container. To do that, though, the container runtime needs to *run* another container. This gets referred to as DinD (Docker in Docker) or PinP (Podman in Podman).
 
 And yes, it is possible, though it does require some pretty creative manipulation.
 
@@ -85,19 +85,19 @@ And yes, it is possible, though it does require some pretty creative manipulatio
 
 OK, so that lets us run podman containers inside a podman container. But execution environments are a special-case container image (with defined entry points etc). Can we do the same thing for EEs?
 
-The answer is yes... but with caveats.
+The answer is yes... just.
 
 What we're trying to achieve is something like this:
 
 ![EE-in-EE Architecture](/img/ee_in_ee/architecture.png)
 
-We're going to build an execution environment called ee_builder (note this has the "first mover" problem - this one has to be built outside of AAP to begin with). Then we can create job templates to run playbooks using ee_utilities, which will run on the ee_builder Execution Environment, against a 'localhost' inventory. That should allow us to generate new EEs from inside AAP.
+We're going to build an execution environment called ee_builder (note this has the "first mover" problem - this one has to be built outside of AAP to begin with). Then we can create job templates to run playbooks using the ee_utilities collection, which will run on the ee_builder Execution Environment, using a 'localhost' inventory. That should allow us to generate new EEs from inside AAP.
 
 ## Building ee_builder
 
-The first consideration with building our ee_builder is what it needs. Obviously it needs the ansible-builder Python package, which we can add to the execution-environment.yaml as a dependency. It also needs access to two collections, containers.podman (for manipulating container images) and infra.ee_utilities.
+The first consideration with building our ee_builder is what tooling it needs. Obviously it needs the ansible-builder Python package, which we can add to the execution-environment.yaml as a dependency. It also needs access to two collections, containers.podman (for manipulating container images) and infra.ee_utilities.
 
-A major problem with a container inside a container is storage and overlay filesystems. The container runtime needs access to storage to present to the container, and for storing a cache of container images. For this reason, the execution environment also needs the fuse-overlayfs package installed.
+A major problem with a container inside a container is storage and, in particular, overlay filesystems. The container runtime needs access to storage to present to the container, and for storing a cache of container images. For this reason, the execution environment also needs the fuse-overlayfs package installed.
 
 The base image and prerequisites section of your execution-environment.yaml definition file will look something like this:
 
@@ -121,7 +121,7 @@ dependencies:
 {% endraw %}
 {% endhighlight %}
 
-The next problem I encountered was that, despite ansible-builder creating and setting a user (user 1000) inside the Containerfile, when AAP runs the container image as an execution environment, it runs as root inside the container. This means that all of the overlay filesystem and container runtime configuration need to be specified for the *root* user, not the default *uid=1000* user.
+The next problem encountered is that, despite ansible-builder creating and setting a user (user 1000) inside its generated Containerfile, when AAP runs the container image as an execution environment, it runs as root inside the container. This means that all of the overlay filesystem and container runtime configuration need to be specified for the *root* user, not the default *uid=1000* user.
 
 With that done, and a couple of other weird bits of hackery to allow for some temp flag files to be written by the container engine, you end up with an execution environment builder execution environment. The customisation in the ee_builder execution-environment.yaml definition looks something like this:
 
@@ -129,8 +129,8 @@ With that done, and a couple of other weird bits of hackery to allow for some te
 {% raw %}
 additional_build_steps:
   prepend_final:
-    - RUN echo root:20000:5000 >> /etc/subuid;
-    - RUN echo root:20000:5000 >> /etc/subgid;
+    - RUN echo root:20000:5000 >> /etc/subuid
+    - RUN echo root:20000:5000 >> /etc/subgid
     - COPY _build/configs/root_containers.conf /etc/containers/containers.conf
     - RUN mkdir -p /runner/libpod/tmp
     - COPY _build/configs/storage.conf /etc/containers/storage.conf
@@ -142,30 +142,32 @@ additional_build_steps:
 {% endraw %}
 {% endhighlight %}
 
+**Note:** this is horribly unoptimised and will generate tons of container layers. "Flattening" the build is a future exercise!
+
 The end result of this process is an ee_builder container image in my image registry:
 
 ![ee_builder in quay.io](/img/ee_in_ee/ee_builder.png)
 
 ## Building an Execution Environment inside AAP
 
-The final step was to get this working inside AAP itself. That involved creating an Execution Environment and pointing it at my ee_builder image:
+The final step is to get this working inside AAP itself. This involves creating an Execution Environment and pointing it at the ee_builder image:
 
 ![Execution Environment in AAP](/img/ee_in_ee/ee_aap.png)
 
-I then created a simple playbook to generate a new execution environment (with AWS collections and python libraries). A project was created to manage this playbook, and an Inventory containing only 'localhost'. Finally, a job template pulls them all together, using the ee_builder Execution Environment to run a playbook using ee_utilities to generate a new AWS execution environment:
+We then create a simple playbook to generate a new execution environment (with AWS collections and python libraries). A project is created to manage this playbook, and an Inventory containing only 'localhost'. Finally, a job template pulls them all together, using the ee_builder Execution Environment to run a playbook using ee_utilities to generate a new AWS execution environment:
 
 ![Execution Environment Build Job](/img/ee_in_ee/job.png)
 
-Once the job runs, my quay.io repository now contains a brand new EE built inside another EE:
+Once the job runs, the destination quay.io repository now contains a brand new EE built inside another EE:
 
 ![ee_aws in quay.io](/img/ee_in_ee/ee_aws.png)
 
-Obviously in a proper deployment, you would retrieve base images and collections from Private Automation Hub, and would push the built execution environments back into Private Automation Hub, rather than using a public image repo like quay.io.
+Naturally, in a proper deployment, you would retrieve base images and collections from Private Automation Hub, and would push the built execution environments back into Private Automation Hub, rather than using a public image repo like quay.io.
 
 
 ## Conclusion
 
-Using a Private Automation Hub node to build execution environments, or having a separate dedicated host to do so, are easy ways to automate your execution environment builds. But as AAP moves to be "everything as containers" it seems odd that there isn't an easy way to build execution environments from within an execution environment. I felt it was a technical challenge that I needed to solve to be able to do so, and the (quite hacky) method above finally managed to achieve it.
+Using a Private Automation Hub node to build execution environments, or having a separate dedicated host to do so, are easy ways to automate your execution environment builds. But as AAP moves to be "everything as containers" it seems odd that there isn't an easy way to build execution environments from within an execution environment. I felt it was a technical challenge that I needed to solve to be able to do so, and the method above, while pushing the boundaries a little, finally managed to achieve it.
 
 
 ## References
