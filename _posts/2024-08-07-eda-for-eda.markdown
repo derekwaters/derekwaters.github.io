@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "EDA for EDA"
-date:   2024-08-07 17:00:00 +1000
+date:   2024-07-08 17:00:00 +1000
 categories: ansible automation platform event driven architecture kafka broker
 ---
 # Event-Driven Ansible for Event-Driven Architecture
