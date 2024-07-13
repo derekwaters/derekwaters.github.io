@@ -38,7 +38,7 @@ The big advantage of an Event-Driven Architecture is to decouple the producers a
 
 > “An event producer doesn’t have to know who is going to consume the event, and an event consumer doesn’t have to know who is going to produce the events it consumes.”
 
-This gives a lot of flexibility in being able to replace or augment components of the architecture independent of one another. If you were to hook an event source (eg. Dynatrace) up directly to EDA, but later on you decide to replace Dynatrace with another source of events, you need to change both the Dynatrace / monitoring side, but also your EDA configuration. If, instead, you are using an Event broker, you can swap out the Event producer for another system, as long as the event format sent to the Event Broker is the same. Similarly, if for some reason you decide you want to use some other system to handle events in your environment, you can swap out EDA for another system (but why would you?) as long as that system can handle events in the same format without any change to the producers of events. It also means these migrations don’t have to be a hard failover, you can add in producers or consumers, then failover or rollback without any change to the systems being replaced.
+This gives a lot of flexibility in being able to replace or augment components of the architecture independent of one another. If you were to hook an event source (eg. Dynatrace) up directly to EDA, but later on you decide to replace Dynatrace with another source of events, you need to change both the Dynatrace / monitoring side, but also your EDA configuration. If, instead, you are using an Event broker, you can swap out the Event producer for another system, as long as the event format sent to the Event Broker is the same. Similarly, if for some reason you decide you want to use some other system to handle events in your environment, you can swap out EDA for another system (but why would you?) without making any change to the producers of events. It also means these migrations don’t have to be a hard failover, you can add in producers or consumers, then failover or rollback without any change to the systems being replaced.
 
 This decoupling also means the various components in your Event-Driven Architecture may be running on different platforms and different technology stacks. You may have event producers running as virtual machines or as containers, either on-premises or in the cloud, but the other parts of your architecture don’t have to know anything about those tech stacks.
 
@@ -47,7 +47,7 @@ This decoupling also means the various components in your Event-Driven Architect
 
 [Apache Kafka](https://kafka.apache.org/) is one of the leading Event-Driven Architecture solutions. There are many implementations of the upstream open source Kafka project, including one from Red Hat - [“streams for Apache Kafka”](https://www.redhat.com/en/blog/introducing-red-hat-openshift-streams-apache-kafka).
 
-![Kafka](/img/eda_for_eda/kafka.jpg)
+![Kafka Easter Egg](/img/eda_for_eda/kafka.jpg)
 
 Kafka provides an event broker mechanism with high resilience and scalability in mind. It uses the concept of ‘topics’ which are basically queues of events. Producers post events to topics, and consumers subscribe to topics to receive new events. Kafka Brokers use partitions to ensure high availability and resilience. The Kafka ecosystem also includes a set of additional tools that support integration with external data systems, allow for transformation of data, and provide data mirroring and disaster recovery functions.
 
@@ -55,7 +55,7 @@ For the purposes of EDA, Kafka is a great way to introduce an event broker mecha
 
 ![EDA Architecture](/img/eda_for_eda/architecture.png)
 
-In this case, events are being produced by both Crowdstrike and Dynatrace. These events are all being placed into a single Kafka cluster, including a topic called “crit-events” for critical incidents or outages. Both EDA and Splunk are both consumers of the “crit-events” topic. EDA can respond to certain events on the “crit-events” topic and launch automation jobs. Splunk can consume and process the same events independently of EDA. In fact, the same system could be both a producer and a consumer of events. So Splunk could be consuming environmental events, but if it’s analysis detects something of note, it could produce a higher level or more directed event for other systems to handle.
+In this case, events are being produced by both Crowdstrike and Dynatrace. These events are all being placed into a single Kafka cluster, including a topic called “crit-events” for critical incidents or outages. EDA and Splunk are both consumers of the “crit-events” topic. EDA can respond to certain events on the “crit-events” topic and launch automation jobs. Splunk can consume and process the same events independently of EDA. In fact, the same system could be both a producer and a consumer of events. So Splunk could be consuming environmental events, but if its analysis detects something of note, it could produce a higher level or more directed event for other systems to handle.
 
 
 ## Deploying Kafka
@@ -63,6 +63,8 @@ In this case, events are being produced by both Crowdstrike and Dynatrace. These
 Red Hat’s build of Apache Kafka, “streams for Apache Kafka” can either be deployed onto RHEL directly, or deployed in an OpenShift environment using the AMQStreams Operator (based on the [Strimzi](https://strimzi.io/) upstream project). The operator makes it really easy to quickly deploy a scalable, highly available Kafka cluster to get started with your Event-Driven Architecture.
 
 Both the cluster itself, and the topics available on the cluster, can all be specified as Kubernetes custom resources (CRs) which means you can deploy them using config-as-code and GitOps pipelines.
+
+For a VM-based deployment on RHEL, there is an [Ansible Collection](https://developers.redhat.com/articles/2023/09/20/automate-your-amq-streams-platform-ansible#deploy_amq_streams_with_ansible) available for AMQStreams to help automate your Kafka deployments.
 
 ## Connecting EDA to Kafka
 
