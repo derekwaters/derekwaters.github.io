@@ -38,7 +38,10 @@ The big advantage of an Event-Driven Architecture is to decouple the producers a
 
 > “An event producer doesn’t have to know who is going to consume the event, and an event consumer doesn’t have to know who is going to produce the events it consumes.”
 
-This gives a lot of flexibility in being able to replace or augment components of the architecture independent of one another. If you were to hook an event source (eg. Dynatrace) up directly to EDA, but later on you decide to replace Dynatrace with another source of events, you need to change both the Dynatrace / monitoring side, but also your EDA configuration. If, instead, you are using an Event broker, you can swap out the Event producer for another system, as long as the event format sent to the Event Broker is the same. Similarly, if for some reason you decide you want to use some other system to handle events in your environment, you can swap out EDA for another system (but why would you?) as long as that system can handle events in the same format without any change to the producers of events.
+This gives a lot of flexibility in being able to replace or augment components of the architecture independent of one another. If you were to hook an event source (eg. Dynatrace) up directly to EDA, but later on you decide to replace Dynatrace with another source of events, you need to change both the Dynatrace / monitoring side, but also your EDA configuration. If, instead, you are using an Event broker, you can swap out the Event producer for another system, as long as the event format sent to the Event Broker is the same. Similarly, if for some reason you decide you want to use some other system to handle events in your environment, you can swap out EDA for another system (but why would you?) as long as that system can handle events in the same format without any change to the producers of events. It also means these migrations don’t have to be a hard failover, you can add in producers or consumers, then failover or rollback without any change to the systems being replaced.
+
+This decoupling also means the various components in your Event-Driven Architecture may be running on different platforms and different technology stacks. You may have event producers running as virtual machines or as containers, either on-premises or in the cloud, but the other parts of your architecture don’t have to know anything about those tech stacks.
+
 
 ## EDA and Kafka
 
@@ -52,7 +55,8 @@ For the purposes of EDA, Kafka is a great way to introduce an event broker mecha
 
 ![EDA Architecture](/img/eda_for_eda/architecture.png)
 
-In this case, events are being produced by both Crowdstrike and Dynatrace. These events are all being placed into a single Kafka cluster, including a topic called “crit-events” for critical incidents or outages. Both EDA and Splunk are both consumers of the “crit-events” topic. EDA can respond to certain events on the “crit-events” topic and launch automation jobs. Splunk can consume and process the same events independently of EDA.
+In this case, events are being produced by both Crowdstrike and Dynatrace. These events are all being placed into a single Kafka cluster, including a topic called “crit-events” for critical incidents or outages. Both EDA and Splunk are both consumers of the “crit-events” topic. EDA can respond to certain events on the “crit-events” topic and launch automation jobs. Splunk can consume and process the same events independently of EDA. In fact, the same system could be both a producer and a consumer of events. So Splunk could be consuming environmental events, but if it’s analysis detects something of note, it could produce a higher level or more directed event for other systems to handle.
+
 
 ## Deploying Kafka
 
